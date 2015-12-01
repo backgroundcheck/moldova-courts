@@ -1,11 +1,13 @@
+import os
 import requests
 import dataset
 import math
 from itertools import count
 from urlparse import urljoin
 
-engine = dataset.connect('sqlite:///data.sqlite')
-table = engine['data']
+db = os.environ.get('DATABASE_URI', 'sqlite:///data.sqlite')
+engine = dataset.connect(db)
+table = engine['md_court_cases']
 
 PAGE_SIZE = 1000
 BASE = 'http://instante.justice.md/apps/hotariri_judecata/inst/'
