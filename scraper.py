@@ -57,7 +57,7 @@ def scrape_court(court):
                 'court': court,
                 'topic': topic
             }
-            table.upsert(record, ['case_id', 'url'])
+            table.upsert(record, ['record_id', 'case_id'])
 
             # res = requests.head(record['url'])
             # print res.headers
