@@ -1,5 +1,6 @@
 import requests
 import dataset
+import math
 from itertools import count
 from urlparse import urljoin
 
@@ -23,7 +24,7 @@ COURTS = ["cac/cac.php", "cab/cab.php", "cabe/cabe.php", "cach/cach.php",
           "jdb/jdb.php", "jcc/jcc.php", "jm/jm.php"]
 
 
-for court in COURTS:
+def scrape_court(court):
     url = urljoin(BASE, court)
     url = urljoin(url, 'db_hot_grid.php')
     for i in count(1):
@@ -31,15 +32,16 @@ for court in COURTS:
             '_search': 'false',
             'nd': 1448893196876,
             'rows': PAGE_SIZE,
-            'page': 1,
+            'page': i,
             'sidx': 'id',
             'sord': 'asc'
         }
         res = requests.post(url, data=q)
         data = res.json()
-        print 'Court %s: page %s (of %s)' % (court, i, data['records'])
-        if i * PAGE_SIZE > data['records']:
-            break
+        pages = int(math.ceil(float(data['records']) / PAGE_SIZE))
+        print 'Court %s: page %s (of %s)' % (court, i, pages)
+        if i > pages:
+            return
         for row in data['rows']:
             id = row.get('id')
             file_href, date, case, parties, typ, topic, _ = row['cell']
@@ -56,6 +58,12 @@ for court in COURTS:
                 'topic': topic
             }
             table.upsert(record, ['record_id'])
+
             # res = requests.head(record['url'])
             # print res.headers
             # print record['url']
+
+
+if __name__ == '__main__':
+    for court in COURTS:
+        scrape_court(court)
